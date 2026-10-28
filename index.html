@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Reads</title>
+  <meta name="description" content="Personal offline-first PDF library and reader.">
+  <meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16140f" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Reads">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- ============ LIBRARY ============ -->
+  <div id="libraryView" class="view">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 7.5C5 6.1 6.1 5 7.5 5H14c1.1 0 2 .9 2 2v20c0-1.1-.9-2-2-2H7.5C6.1 25 5 23.9 5 22.5v-15Z"/><path d="M27 7.5C27 6.1 25.9 5 24.5 5H18c-1.1 0-2 .9-2 2v20c0-1.1.9-2 2-2h6.5c1.4 0 2.5-1.1 2.5-2.5v-15Z" opacity=".55"/></svg>
+        <span>Reads</span>
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="searchInput" type="search" placeholder="Search books" autocomplete="off">
+      </label>
+      <div class="topbar-actions">
+        <button id="syncBtn" class="chip-btn" title="Sync with GitHub" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg>
+          <span id="syncLabel">Sync</span>
+        </button>
+        <span id="netBadge" class="net-badge" hidden>Offline</span>
+        <button id="themeBtn" class="icon-btn" title="Theme" aria-label="Change theme">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        </button>
+        <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+        </button>
+        <button id="uploadBtn" class="primary-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
+          <span>Add books</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="library">
+      <section id="continueSection" class="continue" hidden>
+        <div class="continue-label">Continue reading</div>
+        <div id="continueCard" class="continue-card"></div>
+        <div id="recentRow" class="recent-row"></div>
+      </section>
+
+      <nav class="filters" aria-label="Sections">
+        <div id="categoryChips" class="chips"></div>
+        <button id="newCategoryBtn" class="chip chip-add" title="New section">+ New section</button>
+      </nav>
+
+      <div id="sections"></div>
+      <div id="emptyState" class="empty" hidden>
+        <p>No books match.</p>
+      </div>
+    </main>
+
+    <div id="dropOverlay" class="drop-overlay" hidden><div>Drop PDFs to add</div></div>
+  </div>
+
+  <!-- ============ READER ============ -->
+  <div id="readerView" class="view reader" hidden>
+    <header class="reader-bar reader-top">
+      <button id="backBtn" class="icon-btn" aria-label="Back to library">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="reader-title">
+        <div id="readerTitle" class="t1"></div>
+        <div id="readerSub" class="t2"></div>
+      </div>
+      <button id="tocBtn" class="icon-btn" aria-label="Contents & bookmarks" title="Contents & bookmarks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      </button>
+      <button id="bookmarkBtn" class="icon-btn" aria-label="Bookmark page" title="Bookmark page (B)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3Z"/></svg>
+      </button>
+      <button id="displayBtn" class="icon-btn" aria-label="Reading settings" title="Reading settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 10 4h1l6 16M6.5 14h8"/><path d="M17 9h4M19 7v4"/></svg>
+      </button>
+      <button id="fullscreenBtn" class="icon-btn hide-sm" aria-label="Fullscreen" title="Fullscreen (F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+    </header>
+
+    <div id="viewer" class="viewer" tabindex="0">
+      <div id="pages" class="pages"></div>
+    </div>
+    <div id="warmth" class="warmth-layer"></div>
+    <div id="readerLoading" class="reader-loading" hidden><div class="spinner"></div><div id="readerLoadingText">Opening…</div></div>
+
+    <footer class="reader-bar reader-bottom">
+      <button id="prevBtn" class="icon-btn" aria-label="Previous page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <input id="pageSlider" class="slider" type="range" min="1" max="1" value="1" aria-label="Page">
+      <button id="pageLabel" class="page-label" title="Go to page"><span id="pageNum">1</span> / <span id="pageCount">1</span></button>
+      <button id="nextBtn" class="icon-btn" aria-label="Next page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <div class="zoom-group hide-xs">
+        <button id="zoomOutBtn" class="icon-btn" aria-label="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+        <button id="zoomLabel" class="page-label" title="Fit width">100%</button>
+        <button id="zoomInBtn" class="icon-btn" aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    </footer>
+
+    <!-- Reading settings panel -->
+    <aside id="displayPanel" class="panel display-panel" hidden>
+      <div class="panel-head"><h3>Reading</h3><button class="icon-btn" data-close="displayPanel" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+
+      <div class="field">
+        <div class="field-label">Presets</div>
+        <div class="seg" id="presetSeg">
+          <button data-preset="day">Day</button>
+          <button data-preset="paper">Paper</button>
+          <button data-preset="evening">Evening</button>
+          <button data-preset="night">Night</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Page tone</div>
+        <div class="swatches" id="toneSeg">
+          <button data-tone="normal" class="sw sw-normal" title="Original"><span>Aa</span></button>
+          <button data-tone="sepia" class="sw sw-sepia" title="Sepia"><span>Aa</span></button>
+          <button data-tone="gray" class="sw sw-gray" title="Grayscale"><span>Aa</span></button>
+          <button data-tone="dark" class="sw sw-dark" title="Dark"><span>Aa</span></button>
+          <button data-tone="night" class="sw sw-night" title="Night (warm dark)"><span>Aa</span></button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="brightness">Brightness <output id="brightnessOut"></output></label>
+        <input id="brightness" class="slider" type="range" min="40" max="120" step="1">
+      </div>
+      <div class="field">
+        <label class="field-label" for="warmthRange">Warmth · blue-light filter <output id="warmthOut"></output></label>
+        <input id="warmthRange" class="slider warm" type="range" min="0" max="60" step="1">
+      </div>
+      <div class="field">
+        <label class="field-label" for="contrast">Contrast <output id="contrastOut"></output></label>
+        <input id="contrast" class="slider" type="range" min="70" max="150" step="1">
+      </div>
+
+      <div class="field">
+        <div class="field-label">Layout</div>
+        <div class="seg" id="modeSeg">
+          <button data-mode="scroll">Scroll</button>
+          <button data-mode="paged">Page flip</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Fit</div>
+        <div class="seg" id="fitSeg">
+          <button data-fit="width">Width</button>
+          <button data-fit="page">Page</button>
+          <button data-fit="custom" disabled>Custom</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Background</div>
+        <div class="seg" id="bgSeg">
+          <button data-bg="auto">Auto</button>
+          <button data-bg="light">Light</button>
+          <button data-bg="sepia">Sepia</button>
+          <button data-bg="dark">Dark</button>
+          <button data-bg="black">Black</button>
+        </div>
+      </div>
+      <button id="resetDisplay" class="text-btn">Reset to defaults</button>
+    </aside>
+
+    <!-- Contents panel -->
+    <aside id="tocPanel" class="panel toc-panel" hidden>
+      <div class="panel-head">
+        <div class="seg small" id="tocTabs">
+          <button data-tab="outline" class="on">Contents</button>
+          <button data-tab="bookmarks">Bookmarks</button>
+        </div>
+        <button class="icon-btn" data-close="tocPanel" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <div id="outlineList" class="toc-list"></div>
+      <div id="bookmarkList" class="toc-list" hidden></div>
+    </aside>
+  </div>
+
+  <!-- ============ DIALOGS ============ -->
+  <dialog id="uploadDialog" class="dialog">
+    <form method="dialog" class="dialog-body" id="uploadForm">
+      <h2>Add books</h2>
+      <label class="dropzone" id="dropzone">
+        <input id="fileInput" type="file" accept="application/pdf,.pdf" multiple hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
+        <strong>Choose PDFs</strong>
+        <span>or drop them here</span>
+      </label>
+      <div id="uploadList" class="upload-list"></div>
+      <div class="row">
+        <label class="grow">Section
+          <select id="uploadCategory"></select>
+        </label>
+      </div>
+      <p class="hint" id="uploadHint"></p>
+      <div class="dialog-actions">
+        <button type="button" data-cancel class="text-btn">Cancel</button>
+        <button id="uploadSubmit" value="ok" class="primary-btn" disabled>Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="dialog">
+    <form method="dialog" class="dialog-body" id="settingsForm">
+      <h2>Settings</h2>
+      <fieldset>
+        <legend>GitHub</legend>
+        <p class="hint">Uploads and section changes are committed to your repo. Use a <b>fine-grained token</b> limited to this one repository with <b>Contents: Read and write</b>. The token is stored only in this browser.</p>
+        <div class="row">
+          <label class="grow">Owner <input id="ghOwner" autocomplete="off" spellcheck="false"></label>
+          <label class="grow">Repo <input id="ghRepo" autocomplete="off" spellcheck="false"></label>
+          <label>Branch <input id="ghBranch" autocomplete="off" spellcheck="false" size="8"></label>
+        </div>
+        <label>Token <input id="ghToken" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+        <div class="row">
+          <button type="button" id="testTokenBtn" class="text-btn">Test connection</button>
+          <button type="button" id="clearTokenBtn" class="text-btn danger">Forget token</button>
+          <span id="tokenStatus" class="hint"></span>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Offline</legend>
+        <p class="hint" id="storageInfo">Checking storage…</p>
+        <div class="row">
+          <button type="button" id="offlineAllBtn" class="text-btn">Download all books</button>
+          <button type="button" id="clearOfflineBtn" class="text-btn danger">Remove downloads</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Appearance</legend>
+        <div class="seg" id="appThemeSeg">
+          <button type="button" data-theme="auto">Auto</button>
+          <button type="button" data-theme="light">Light</button>
+          <button type="button" data-theme="sepia">Sepia</button>
+          <button type="button" data-theme="dark">Dark</button>
+          <button type="button" data-theme="black">Black</button>
+        </div>
+      </fieldset>
+      <div class="dialog-actions">
+        <button type="button" data-cancel class="text-btn">Close</button>
+        <button value="ok" class="primary-btn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="promptDialog" class="dialog small">
+    <form method="dialog" class="dialog-body">
+      <h2 id="promptTitle"></h2>
+      <div id="promptFields"></div>
+      <div class="dialog-actions">
+        <button type="button" data-cancel class="text-btn">Cancel</button>
+        <button value="ok" id="promptOk" class="primary-btn">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="menu" class="menu" hidden></div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

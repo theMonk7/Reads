@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "categories": [
+    { "id": "finance", "name": "Finance" },
+    { "id": "education", "name": "Education" },
+    { "id": "swift", "name": "Swift" },
+    { "id": "dsa", "name": "DSA & Algorithms" }
+  ],
+  "books": [
+    {
+      "id": "the-psychology-of-money",
+      "title": "The Psychology of Money",
+      "author": "Morgan Housel",
+      "path": "Books/the-psychology-of-money.pdf",
+      "category": "finance",
+      "size": 2250143,
+      "added": "2026-10-28T00:00:00.000Z"
+    },
+    {
+      "id": "how-to-make-money-in-stocks",
+      "title": "How to Make Money in Stocks",
+      "author": "William J. O'Neil",
+      "path": "Books/how-to-make-money-in-stocks.pdf",
+      "category": "finance",
+      "size": 2434871,
+      "added": "2026-10-28T00:00:00.000Z"
+    },
+    {
+      "id": "how-to-day-trade-for-a-living",
+      "title": "How to Day Trade for a Living",
+      "author": "Andrew Aziz",
+      "path": "Books/how-to-day-trade-for-a-living.pdf",
+      "category": "finance",
+      "size": 2519166,
+      "added": "2026-10-28T00:00:00.000Z"
+    },
+    {
+      "id": "dalio-changing-world-order-charts",
+      "title": "The Changing World Order — Charts",
+      "author": "Ray Dalio",
+      "path": "Books/dalio-changing-world-order-charts.pdf",
+      "category": "finance",
+      "size": 2717326,
+      "added": "2026-10-28T00:00:00.000Z"
+    }
+  ]
+}
