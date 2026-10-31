@@ -101,6 +101,11 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .chip-btn svg { width: 16px; height: 16px; }
 .chip-btn.busy svg { animation: spin 1s linear infinite; }
 .chip-btn.pending { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.chip-btn.account { gap: 6px; padding: 0 10px; }
+.chip-btn.account .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex: none; }
+.chip-btn.account.offline .dot { background: var(--ink-2); opacity: .6; }
+.chip-btn.account.bad { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
+.chip-btn.account.bad .dot { background: var(--danger); }
 .net-badge {
   font-size: 12px; font-weight: 600; letter-spacing: .02em;
   padding: 5px 10px; border-radius: 999px; background: var(--ink); color: var(--bg);
@@ -162,17 +167,32 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .recent-item .t { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .recent-item .s { font-size: 12px; color: var(--ink-3); }
 
-.filters { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; position: sticky; top: calc(61px + var(--safe-top)); z-index: 10; padding: 8px 0; background: var(--bg); }
-.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
-.chips::-webkit-scrollbar { display: none; }
-.chip {
-  flex: none; height: 34px; padding: 0 14px; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font-size: 14px; white-space: nowrap;
+.drawer {
+  margin: 0; inset: 0 auto 0 0; height: 100dvh; max-height: none;
+  width: min(300px, 84vw); padding: calc(10px + var(--safe-top)) 12px max(16px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  border: 0; border-right: 1px solid var(--line); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-lg);
+  flex-direction: column; gap: 8px;
 }
-.chip .n { color: var(--ink-3); margin-left: 4px; font-size: 12px; }
-.chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.chip.on .n { color: inherit; opacity: .7; }
-.chip-add { border-style: dashed; color: var(--accent); }
+.drawer[open] { display: flex; animation: slide-in .2s ease; }
+.drawer::backdrop { background: rgb(20 15 5 / .45); backdrop-filter: blur(3px); }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 0 0 0 8px; }
+.drawer-head h2 { margin: 0; font: 600 20px var(--serif); }
+.drawer-list { display: flex; flex-direction: column; gap: 2px; overflow-y: auto; flex: 1; min-height: 0; }
+.drawer-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 10px 12px;
+  border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--ink-2); font-size: 15px; text-align: left;
+}
+.drawer-item:hover { background: var(--surface-2); color: var(--ink); }
+.drawer-item .name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.drawer-item .n { color: var(--ink-3); font-size: 13px; }
+.drawer-item.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.drawer-item.on .n { color: inherit; opacity: .75; }
+.drawer-add {
+  min-height: 44px; padding: 0 12px; border-radius: var(--radius-sm); border: 1px dashed var(--line);
+  background: transparent; color: var(--accent); text-align: left;
+}
+.drawer-add:hover { border-color: var(--accent); }
+@keyframes slide-in { from { transform: translateX(-100%); } }
 
 .section { margin-bottom: 34px; }
 .section-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
@@ -416,7 +436,6 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
   .topbar-actions { margin-left: auto; }
   .primary-btn span { display: none; }
   #uploadBtn { width: 40px; padding: 0; justify-content: center; }
-  .filters { top: calc(107px + var(--safe-top)); }
   .grid { grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 18px 12px; }
   .continue-card { grid-template-columns: 86px 1fr; gap: 14px; padding: 14px; }
   .continue-card .cover { width: 86px; }

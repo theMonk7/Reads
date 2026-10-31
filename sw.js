@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION when shipping app changes.
-const VERSION = 'v1';
+const VERSION = 'v3';
 const SHELL = `reads-shell-${VERSION}`;
 const VENDOR = 'reads-vendor-v4.10.38';
 const BOOKS = 'reads-books';

@@ -109,7 +109,35 @@ export function repoSettings() {
 }
 export function saveRepoSettings(s) { prefs.set('repo', s); }
 export function getToken() { return prefs.get('token', ''); }
-export function setToken(t) { t ? prefs.set('token', t) : prefs.del('token'); }
+export function setToken(t) {
+  if (t !== getToken()) prefs.del('account');
+  t ? prefs.set('token', t) : prefs.del('token');
+}
+
+// Last verified sign-in, cached so the badge still shows offline.
+// { login, repo, ok, checked } — ok:false means GitHub rejected the token.
+export function getAccount() {
+  return getToken() ? prefs.get('account', null) : null;
+}
+
+export async function verifyAccount(token = getToken()) {
+  if (!token) { prefs.del('account'); return null; }
+  if (!navigator.onLine) return getAccount();
+  const gh = github(token);
+  const prev = getAccount();
+  try {
+    await gh.check();
+    const me = await gh.user().catch(() => null);
+    const account = { login: me?.login || prev?.login || '', repo: `${gh.owner}/${gh.repo}`, ok: true, checked: new Date().toISOString() };
+    prefs.set('account', account);
+    return account;
+  } catch (e) {
+    if (!e.status) return prev; // network failure: keep the cached state
+    const account = { ...prev, repo: `${gh.owner}/${gh.repo}`, ok: false, error: e.message, checked: new Date().toISOString() };
+    prefs.set('account', account);
+    return account;
+  }
+}
 
 export function github(token = getToken()) {
   return token ? new GitHub({ ...repoSettings(), token }) : null;

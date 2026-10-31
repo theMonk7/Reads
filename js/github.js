@@ -43,6 +43,8 @@ export class GitHub {
     return r;
   }
 
+  user() { return this.req('/user'); }
+
   async headCommit() {
     const ref = await this.req(`${this.repoPath}/git/ref/heads/${encodeURIComponent(this.branch)}`);
     const commit = await this.req(`${this.repoPath}/git/commits/${ref.object.sha}`);

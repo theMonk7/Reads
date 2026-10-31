@@ -19,6 +19,9 @@
   <!-- ============ LIBRARY ============ -->
   <div id="libraryView" class="view">
     <header class="topbar">
+      <button id="menuBtn" class="icon-btn" title="Sections" aria-label="Open sections" aria-controls="sectionsDrawer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
       <div class="brand">
         <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 7.5C5 6.1 6.1 5 7.5 5H14c1.1 0 2 .9 2 2v20c0-1.1-.9-2-2-2H7.5C6.1 25 5 23.9 5 22.5v-15Z"/><path d="M27 7.5C27 6.1 25.9 5 24.5 5H18c-1.1 0-2 .9-2 2v20c0-1.1.9-2 2-2h6.5c1.4 0 2.5-1.1 2.5-2.5v-15Z" opacity=".55"/></svg>
         <span>Reads</span>
@@ -33,6 +36,11 @@
           <span id="syncLabel">Sync</span>
         </button>
         <span id="netBadge" class="net-badge" hidden>Offline</span>
+        <button id="accountBtn" class="chip-btn account" hidden>
+          <span class="dot" aria-hidden="true"></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span id="accountLabel" class="hide-xs"></span>
+        </button>
         <button id="themeBtn" class="icon-btn" title="Theme" aria-label="Change theme">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
         </button>
@@ -52,11 +60,6 @@
         <div id="continueCard" class="continue-card"></div>
         <div id="recentRow" class="recent-row"></div>
       </section>
-
-      <nav class="filters" aria-label="Sections">
-        <div id="categoryChips" class="chips"></div>
-        <button id="newCategoryBtn" class="chip chip-add" title="New section">+ New section</button>
-      </nav>
 
       <div id="sections"></div>
       <div id="emptyState" class="empty" hidden>
@@ -215,6 +218,17 @@
         <button id="uploadSubmit" value="ok" class="primary-btn" disabled>Add</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="sectionsDrawer" class="drawer" aria-label="Sections">
+    <div class="drawer-head">
+      <h2>Sections</h2>
+      <button type="button" class="icon-btn" data-cancel aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <nav id="categoryChips" class="drawer-list" aria-label="Sections"></nav>
+    <button id="newCategoryBtn" class="drawer-add" type="button">+ New section</button>
   </dialog>
 
   <dialog id="settingsDialog" class="dialog">

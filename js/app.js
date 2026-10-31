@@ -1,7 +1,7 @@
 import { MAX_UPLOAD_BYTES } from './config.js';
 import { idb, prefs, bookUrl, cachedBookBlob, putBookInCache, removeBookFromCache, cachedBookPaths, clearBookCache } from './store.js';
 import {
-  library, loadLibrary, refreshRemote, sync, github, getToken, setToken, repoSettings, saveRepoSettings,
+  library, loadLibrary, refreshRemote, sync, github, getToken, setToken, repoSettings, saveRepoSettings, getAccount, verifyAccount,
   addCategory, renameCategory, moveCategory, deleteCategory, addBook, editBook, deleteBook, isPendingBook,
 } from './library.js';
 import { Reader, renderCover } from './reader.js';
@@ -210,12 +210,13 @@ function renderLibrary() {
         <div style="min-width:0"><div class="t">${esc(b.title)}</div><div class="s">${progress.pct(b.id)}% read</div></div></div>`).join('');
   }
 
-  // Chips
+  // Sections drawer
   const count = (id) => books.filter((b) => (id === 'none' ? !catIds.has(b.category) : b.category === id)).length;
   const chips = [{ id: 'all', name: 'All', n: books.length }, ...categories.map((c) => ({ ...c, n: count(c.id) }))];
   if (uncategorized.length) chips.push({ id: 'none', name: 'Unsorted', n: uncategorized.length });
   $('#categoryChips').innerHTML = chips.map((c) =>
-    `<button class="chip ${state.filter === c.id ? 'on' : ''}" data-filter="${esc(c.id)}">${esc(c.name)}<span class="n">${c.n}</span></button>`).join('');
+    `<button class="drawer-item ${state.filter === c.id ? 'on' : ''}" data-filter="${esc(c.id)}" ${state.filter === c.id ? 'aria-current="true"' : ''}>
+      <span class="name">${esc(c.name)}</span><span class="n">${c.n}</span></button>`).join('');
 
   // Sections
   let groups = categories.map((c) => ({ ...c, books: books.filter((b) => b.category === c.id) }));
@@ -273,8 +274,6 @@ $('#libraryView').addEventListener('click', (e) => {
   if (bm) { e.stopPropagation(); return bookMenu(bm.dataset.bookmenu, bm); }
   const cm = t.closest('[data-catmenu]');
   if (cm) return categoryMenu(cm.dataset.catmenu, cm);
-  const f = t.closest('[data-filter]');
-  if (f) { state.filter = f.dataset.filter; prefs.set('filter', state.filter); return renderLibrary(); }
   const add = t.closest('[data-addto]');
   if (add) return openUpload([], add.dataset.addto);
   const open = t.closest('[data-open]');
@@ -353,7 +352,22 @@ function categoryMenu(id, anchor) {
   ].filter(Boolean));
 }
 
+// =============== Sections drawer ===============
+const drawer = $('#sectionsDrawer');
+$('#menuBtn').onclick = () => drawer.showModal();
+drawer.addEventListener('click', (e) => {
+  if (e.target === drawer) return drawer.close(); // backdrop
+  const f = e.target.closest('[data-filter]');
+  if (!f) return;
+  state.filter = f.dataset.filter;
+  prefs.set('filter', state.filter);
+  drawer.close();
+  renderLibrary();
+  scrollTo({ top: 0 });
+});
+
 $('#newCategoryBtn').onclick = async () => {
+  drawer.close();
   const v = await prompt('New section', [{ name: 'name', label: 'Name', placeholder: 'e.g. System Design' }]);
   if (v?.name?.trim()) {
     state.filter = addCategory(v.name);
@@ -500,7 +514,32 @@ function updateSyncUi() {
   btn.classList.toggle('pending', n > 0);
   $('#syncLabel').textContent = library.syncing ? 'Syncing…' : `${n} to sync`;
   $('#netBadge').hidden = navigator.onLine;
+  updateAccountUi();
 }
+
+// =============== Account badge ===============
+function updateAccountUi() {
+  const btn = $('#accountBtn');
+  const a = getAccount();
+  btn.hidden = !getToken();
+  if (btn.hidden) return;
+  const offline = !navigator.onLine;
+  const bad = a?.ok === false;
+  const who = a?.login ? `@${a.login}` : 'GitHub';
+  btn.classList.toggle('offline', offline);
+  btn.classList.toggle('bad', bad);
+  $('#accountLabel').textContent = bad ? 'Sign in again' : who;
+  btn.title = bad ? `${a.error || 'GitHub rejected the token.'} Open Settings to update it.`
+    : offline ? `Signed in as ${who} · offline. Changes sync when you reconnect.`
+    : `Signed in as ${who}${a?.repo ? ` · ${a.repo}` : ''}`;
+  btn.setAttribute('aria-label', btn.title);
+}
+async function refreshAccount() {
+  await verifyAccount().catch(() => {});
+  updateAccountUi();
+}
+$('#accountBtn').onclick = () => openSettings();
+addEventListener('online', refreshAccount);
 $('#syncBtn').onclick = async () => {
   try {
     if (await sync()) toast('Synced with GitHub');
@@ -547,16 +586,19 @@ $('#testTokenBtn').onclick = async () => {
     saveRepoSettings(repo);
     await github(token).check();
     st.className = 'hint ok'; st.textContent = `✓ Can write to ${repo.owner}/${repo.repo}`;
+    if (token === getToken()) refreshAccount();
   } catch (e) {
     st.className = 'hint err'; st.textContent = e.message;
   }
 };
-$('#clearTokenBtn').onclick = () => { $('#ghToken').value = ''; setToken(''); $('#tokenStatus').textContent = 'Token removed from this browser.'; };
+$('#clearTokenBtn').onclick = () => { $('#ghToken').value = ''; setToken(''); updateAccountUi(); $('#tokenStatus').textContent = 'Token removed from this browser.'; };
 $('#settingsDialog').addEventListener('close', () => {
   if ($('#settingsDialog').returnValue !== 'ok') return;
   const { repo, token } = readSettingsForm();
   saveRepoSettings(repo);
   setToken(token);
+  updateAccountUi();
+  refreshAccount();
   if (token && library.pending) $('#syncBtn').click();
   else refreshRemote();
 });
@@ -883,6 +925,7 @@ async function boot() {
   ]);
   await loadLibrary();
   renderLibrary();
+  refreshAccount();
 
   const params = new URLSearchParams(location.search);
   if (params.has('resume') && prefs.get('last')) {
