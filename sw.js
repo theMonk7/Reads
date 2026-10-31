@@ -1,5 +1,5 @@
 // Offline support. Bump VERSION when shipping app changes.
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL = `reads-shell-${VERSION}`;
 const VENDOR = 'reads-vendor-v4.10.38';
 const BOOKS = 'reads-books';
@@ -47,8 +47,8 @@ self.addEventListener('fetch', (e) => {
   if (path.endsWith('/library.json')) return; // app handles library freshness itself
   if (path.toLowerCase().endsWith('.pdf')) return e.respondWith(book(req));
   if (path.includes('/vendor/')) return e.respondWith(cacheFirst(req, VENDOR));
-  if (req.mode === 'navigate') return e.respondWith(networkFirst(req, 'index.html'));
-  e.respondWith(networkFirst(req));
+  if (req.mode === 'navigate') return e.respondWith(shell(req, 'index.html'));
+  e.respondWith(shell(req));
 });
 
 async function cacheFirst(req, name) {
@@ -60,24 +60,16 @@ async function cacheFirst(req, name) {
   return res;
 }
 
-async function networkFirst(req, fallback) {
+// App shell: serve this version's cached snapshot so the HTML and JS always
+// come from the same release. New releases arrive by bumping VERSION, which
+// installs a fresh snapshot (the page reloads on controllerchange).
+async function shell(req, key) {
   const cache = await caches.open(SHELL);
-  try {
-    const res = await withTimeout(fetch(req, { cache: 'no-cache' }), 4000);
-    if (res.ok) cache.put(fallback || req, res.clone());
-    return res;
-  } catch {
-    const hit = await cache.match(fallback || req, { ignoreSearch: true });
-    if (hit) return hit;
-    throw new Error('offline');
-  }
-}
-
-function withTimeout(p, ms) {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('timeout')), ms);
-    p.then((v) => { clearTimeout(t); resolve(v); }, (err) => { clearTimeout(t); reject(err); });
-  });
+  const hit = await cache.match(key || req, { ignoreSearch: true });
+  if (hit) return hit;
+  const res = await fetch(req);
+  if (res.ok) cache.put(key || req, res.clone());
+  return res;
 }
 
 // Books: serve downloaded copies (including byte ranges for pdf.js), else network.

@@ -29,7 +29,7 @@ The token is stored only in that browser's localStorage. Never commit it.
 | `js/library.js` | Library state, offline edit queue, GitHub sync |
 | `js/reader.js` | pdf.js reader |
 | `js/github.js` | GitHub Git Data API client |
-| `sw.js` | Service worker (bump `VERSION` when you change app files) |
+| `sw.js` | Service worker. The app shell is served from cache as one snapshot, so **bump `VERSION` on every app change** or devices keep the old version |
 | `vendor/pdfjs/` | pdf.js 4.10.38 (legacy build), Apache-2.0 |
 
 ## Adding books without the site

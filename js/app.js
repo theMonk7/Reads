@@ -354,9 +354,17 @@ function categoryMenu(id, anchor) {
 
 // =============== Sections drawer ===============
 const drawer = $('#sectionsDrawer');
-$('#menuBtn').onclick = () => drawer.showModal();
+$('#menuBtn').onclick = () => {
+  if (drawer.open) return;
+  if (drawer.showModal) drawer.showModal(); else drawer.setAttribute('open', '');
+};
 drawer.addEventListener('click', (e) => {
-  if (e.target === drawer) return drawer.close(); // backdrop
+  // Backdrop clicks target the dialog itself but land outside its box.
+  if (e.target === drawer) {
+    const r = drawer.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) drawer.close();
+    return;
+  }
   const f = e.target.closest('[data-filter]');
   if (!f) return;
   state.filter = f.dataset.filter;
@@ -936,7 +944,16 @@ async function boot() {
   }
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW registration failed', e));
+    // A new version takes over as one unit; reload so HTML and JS always match.
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController) return;
+      if (readerView.hidden && !$('dialog[open]')) location.reload();
+      else toast('Reads was updated — the new version loads next time you open it.', { ms: 5000 });
+    });
+    navigator.serviceWorker.register('sw.js')
+      .then((reg) => addEventListener('online', () => reg.update().catch(() => {})))
+      .catch((e) => console.warn('SW registration failed', e));
   }
   navigator.storage?.persist?.().catch(() => {});
 }

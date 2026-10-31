@@ -158,8 +158,8 @@ function uniqueId(base, taken) {
 async function push(op) {
   op.k = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
   ops.push(op);
+  rebuild(); // update the view first so callers can use the result right away
   await persist();
-  rebuild();
   scheduleSync();
 }
 
