@@ -1,10 +1,26 @@
 {
   "version": 1,
   "categories": [
-    { "id": "finance", "name": "Finance" },
-    { "id": "education", "name": "Education" },
-    { "id": "swift", "name": "Swift" },
-    { "id": "dsa", "name": "DSA & Algorithms" }
+    {
+      "id": "finance",
+      "name": "Finance"
+    },
+    {
+      "id": "education",
+      "name": "Education"
+    },
+    {
+      "id": "swift",
+      "name": "Swift"
+    },
+    {
+      "id": "dsa",
+      "name": "DSA & Algorithms"
+    },
+    {
+      "id": "content-creation",
+      "name": "Content Creation"
+    }
   ],
   "books": [
     {
@@ -43,5 +59,7 @@
       "size": 2717326,
       "added": "2026-10-28T00:00:00.000Z"
     }
-  ]
+  ],
+  "rev": 1,
+  "updated": "2026-11-01T12:46:47.840Z"
 }
