@@ -58,8 +58,17 @@
       "category": "finance",
       "size": 2717326,
       "added": "2026-10-28T00:00:00.000Z"
+    },
+    {
+      "id": "the-psychology-of-persuasion",
+      "title": "The Psychology Of Persuasion",
+      "author": "",
+      "path": "Books/the-psychology-of-persuasion.pdf",
+      "category": "content-creation",
+      "size": 3574104,
+      "added": "2026-11-01T12:46:55.148Z"
     }
   ],
-  "rev": 1,
-  "updated": "2026-11-01T12:46:47.840Z"
+  "rev": 2,
+  "updated": "2026-11-01T13:06:11.453Z"
 }
